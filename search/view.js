@@ -18,6 +18,8 @@ define([
             var self = this;
 
             self.$el.html(template);
+ 
+
         },
 
         render: function() {
@@ -32,63 +34,11 @@ define([
 
     			$(".console")[0].innerHTML = '';
 
-          function grep(name, object, str) {
-
-  		    	var re = function f(x) {
-	  			    return x !== null && (x + '').match && (x + '').match(RegExp(search)) != null;			     
-      		  };
-			
-  	    		var results = 50;
-		      	var checked = 'test12345';
-            var start = Math.random();
-
-      			var ex = function (name, base) {
-              var stack = [];
-
-              _.each(_.keys(base), function(item){ 
-                stack[stack.length] = {
-                 'base': base,
-                 'key': item, 
-                 'name': name}; 
-              });
-
-              while (stack.length > 0 && results > 0) {
-                var item = stack.splice(0, 1)[0];
-                var base = item.base;
-                var key = item.key;
-
-  			    		if (key === checked ||
-                    base[key] == null || 
-                    base[key][checked] === start) {
-			  		      continue;
-    		  		  }
-
-                base[key][checked] = start;
-
-  	    				if (re(key) || re(base[key]) || re(name + "." + key)) {
-			    		  	console.log(name + "." + key + " = " + base[key]);
-				      		results--;
-			  	    	}
-
-    	  			  if (_.isObject(base)) {
-                  _.each(base[key], function(item) {
-                      stack[stack.length] =
-                        {'base': base[key], 
-                         'key': item, 
-                         'name': name + "." + item};
-                  });
-                }
-						
-    			  		checked[base[key]] = true;
-  	  	  	  }
-           }
+          grep("this", this, search);
+		      grep("arguments", arguments, search);
+		      grep("window", window, search);
         }
-		    grep("this", this, search);
-		    grep("arguments", arguments, search);
-		    grep("window", window, search);
-      }
     });
-
-    return exports;
+ 
 });
 
