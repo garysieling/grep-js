@@ -70,7 +70,8 @@
         console.log('error in require: ' + e);
     };
 
-    require(['{{mainModule}}'], function(crud) {});
+    //    require(['{{mainModule}}'], function(crud) {});
+    require(['search/main.js'], function(crud) {});
 
 })();
 </script>
