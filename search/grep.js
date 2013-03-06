@@ -1,10 +1,11 @@
 
 window.grep = 
-	function grep(base, search, limit, name) {
+	function grep(base, search, limit, begin) {
         var breaker = {};
 		var ArrayProto = Array.prototype;
 		var  nativeForEach      = ArrayProto.forEach;
 		var nativeKeys         = Object.keys;
+        var nativeIsArray      = Array.isArray;
 
 	      var has = function(obj, key) {
 		    return hasOwnProperty.call(obj, key);
@@ -25,6 +26,10 @@ window.grep =
         		}
 		      }
 		    }
+		  };
+		
+		  var isArray = nativeIsArray || function(obj) {
+		    return toString.call(obj) == '[object Array]';
 		  };
 
 		var keys = nativeKeys || function(obj) {
@@ -49,17 +54,22 @@ window.grep =
 
 		var stack = [];
 
+		var index = 0;
+		console.log("Base object " + (isArray(base) ? "is array" : "is not array"));
 		each(keys(base), function(item){ 
+			var key = isArray(base) ? (name + "[" + index++ + "]") : item;
+
 			stack[stack.length] = {
 				'base': base,
 				'key': item, 
-				'name': name}; 
+				'name': key}; 
 		});
 
 		while (stack.length > 0 && results > 0) {
 			var item = stack.splice(0, 1)[0];
 			var base = item.base;
 			var key = item.key;
+			var name = item.name;
 
 			if (key === checked ||
 				base[key] == null || 
@@ -69,21 +79,37 @@ window.grep =
 
 				base[key][checked] = start;
 
-				var prefix = name ? name + "." : '';
-				if (re(key) || re(base[key]) || re(prefix + key)) {
-					found[found.length] = 
-						(prefix + key + " = " + base[key]);
-					results--;
-				}
-
-				if (isObject(base)) {
-					each(base[key], function(item) {
+				console.log("Testing " + key + " " + (isArray(base[key]) ? " which is an array" : "which is not an array"));
+				if (isArray(base[key])) {
+					for (var i = 0; i < base[key].length; i++) {
 						stack[stack.length] =
 							{'base': base[key], 
-								'key': item, 
-								'name': name + "." + item};
-					});
+								'key': i, 
+								'name': name + "." + key + "[" + i + "]"};
+
+						console.log(stack[stack.length-1]);
+					}
+
+					continue;
+				} else {
+					if (re(key) || re(base[key]) || re(begin + "." + key)) {
+						var prefix = begin ? begin + "." : 'obj.';
+					    
+						found[found.length] = 
+							('`' + prefix + '`' + name + " = " + base[key]);
+						results--;
+					}
+
+					if (isObject(base)) {
+						each(base[key], function(item) {
+							stack[stack.length] =
+								{'base': base[key], 
+									'key': item, 
+									'name': name + "." + item};
+						});
+					}
 				}
+			
 
 				checked[base[key]] = true;
 		}
