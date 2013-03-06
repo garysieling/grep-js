@@ -1,56 +1,93 @@
 
 window.grep = 
-    function grep(base, search, name) {
-            var found = [];
-            var re = function f(x) {
-	  			    return x !== null && (x + '').match && (x + '').match(RegExp(search)) != null;			     
-      		  };
+	function grep(base, search, limit, name) {
+        var breaker = {};
+		var ArrayProto = Array.prototype;
+		var  nativeForEach      = ArrayProto.forEach;
+		var nativeKeys         = Object.keys;
 
- 	    		var results = 50;
-		      	var checked = 'www.garysieling.com/blog';
-            var start = Math.random();
+	      var has = function(obj, key) {
+		    return hasOwnProperty.call(obj, key);
+		  };
 
-              var stack = [];
+		  var each = function(obj, iterator, context) {
+		    if (obj == null) return;
+		    if (nativeForEach && obj.forEach === nativeForEach) {
+		      obj.forEach(iterator, context);
+		    } else if (obj.length === +obj.length) {
+		      for (var i = 0, l = obj.length; i < l; i++) {
+		        if (iterator.call(context, obj[i], i, obj) === breaker) return;
+		      }
+		    } else {
+		      for (var key in obj) {
+        		if (has(obj, key)) {
+		          if (iterator.call(context, obj[key], key, obj) === breaker) return;
+        		}
+		      }
+		    }
+		  };
 
-              _.each(_.keys(base), function(item){ 
-                stack[stack.length] = {
-                 'base': base,
-                 'key': item, 
-                 'name': name}; 
-              });
+		var keys = nativeKeys || function(obj) {
+		    if (obj !== Object(obj)) throw new TypeError('Invalid object');
+		    var keys = [];
+		    for (var key in obj) if (has(obj, key)) keys[keys.length] = key;
+		    return keys;
+		  }
 
-              while (stack.length > 0 && results > 0) {
-                var item = stack.splice(0, 1)[0];
-                var base = item.base;
-                var key = item.key;
+		var isObject = function(obj) {
+		    return obj === Object(obj);
+		  };	
 
-  			    		if (key === checked ||
-                    base[key] == null || 
-                    base[key][checked] === start) {
-			  		      continue;
-    		  		  }
+	    var found = [];
+		var re = function f(x) {
+			return x !== null && (x + '').match && (x + '').match(RegExp(search)) != null;			     
+		};
 
-                base[key][checked] = start;
+		var results = limit ? limit : 10;
+		var checked = 'www.garysieling.com/blog';
+		var start = Math.random();
 
-                var prefix = name ? name + "." : '';
-  	    				if (re(key) || re(base[key]) || re(prefix + key)) {
-			    		  	found[found.length] = 
-                     (prefix + key + " = " + base[key]);
-				      		results--;
-			  	    	}
+		var stack = [];
 
-    	  			  if (_.isObject(base)) {
-                  _.each(base[key], function(item) {
-                      stack[stack.length] =
-                        {'base': base[key], 
-                         'key': item, 
-                         'name': name + "." + item};
-                  });
-                }
-						
-    			  		checked[base[key]] = true;
-  	  	  	  }
+		each(keys(base), function(item){ 
+			stack[stack.length] = {
+				'base': base,
+				'key': item, 
+				'name': name}; 
+		});
 
-           return found;
-        };
-		   
+		while (stack.length > 0 && results > 0) {
+			var item = stack.splice(0, 1)[0];
+			var base = item.base;
+			var key = item.key;
+
+			if (key === checked ||
+				base[key] == null || 
+				base[key][checked] === start) {
+					continue;
+				}
+
+				base[key][checked] = start;
+
+				var prefix = name ? name + "." : '';
+				if (re(key) || re(base[key]) || re(prefix + key)) {
+					found[found.length] = 
+						(prefix + key + " = " + base[key]);
+					results--;
+				}
+
+				if (isObject(base)) {
+					each(base[key], function(item) {
+						stack[stack.length] =
+							{'base': base[key], 
+								'key': item, 
+								'name': name + "." + item};
+					});
+				}
+
+				checked[base[key]] = true;
+		}
+
+		return found;
+	};
+
