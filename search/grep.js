@@ -1,6 +1,6 @@
 
 window.grep = 
-	function grep(base, search, limit, begin) {
+	function grep(base, search, limit, begin, log) {
         var breaker = {};
 		var ArrayProto = Array.prototype;
 		var  nativeForEach      = ArrayProto.forEach;
@@ -55,8 +55,10 @@ window.grep =
 		var stack = [];
 
 		var index = 0;
-		console.log("Base object " + (isArray(base) ? "is array" : "is not array"));
+
+		if (log) console.log("Base object " + (isArray(base) ? "is array" : "is not array"));
 		each(keys(base), function(item){ 
+			if (log) console.log("Processing key " + item );
 			var key = isArray(base) ? (name + "[" + index++ + "]") : item;
 
 			stack[stack.length] = {
@@ -74,33 +76,40 @@ window.grep =
 			if (key === checked ||
 				base[key] == null || 
 				base[key][checked] === start) {
+					if (log) console.log("Skipping " + name + "." + key );
+
 					continue;
 				}
 
 				base[key][checked] = start;
 
-				console.log("Testing " + key + " " + (isArray(base[key]) ? " which is an array" : "which is not an array"));
 				if (isArray(base[key])) {
+					if (log) console.log("Processing array " + name + "." + key );
+
 					for (var i = 0; i < base[key].length; i++) {
 						stack[stack.length] =
 							{'base': base[key], 
 								'key': i, 
-								'name': name + "." + key + "[" + i + "]"};
+								'name': name + "[" + i + "]"};
 
-						console.log(stack[stack.length-1]);
+						if (log) console.log(stack[stack.length-1]);
 					}
 
 					continue;
 				} else {
 					if (re(key) || re(base[key]) || re(begin + "." + key)) {
+						if (log) console.log("Found " + name + "." + key );
+
 						var prefix = begin ? begin + "." : 'obj.';
 					    
 						found[found.length] = 
-							('`' + prefix + '`' + name + " = " + base[key]);
+							(prefix + name + " = " + base[key]);
 						results--;
 					}
 
 					if (isObject(base)) {
+						if (log) console.log("Processing Object " + name + "." + key );
+
 						each(base[key], function(item) {
 							stack[stack.length] =
 								{'base': base[key], 
