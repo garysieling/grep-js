@@ -1,6 +1,7 @@
 
 window.grep = 
 	function grep(base, search, limit, begin, log) {
+      if (log) console.log("Search : " + search);
         var breaker = {};
 		var ArrayProto = Array.prototype;
 		var  nativeForEach      = ArrayProto.forEach;
@@ -57,6 +58,7 @@ window.grep =
 		var index = 0;
 
 		if (log) console.log("Base object " + (isArray(base) ? "is array" : "is not array"));
+
 		each(keys(base), function(item){ 
 			if (log) console.log("Processing key " + item );
 			var key = isArray(base) ? (name + "[" + index++ + "]") : item;
@@ -64,14 +66,24 @@ window.grep =
 			stack[stack.length] = {
 				'base': base,
 				'key': item, 
-				'name': key}; 
-		});
+        'array': isArray(base),
+				'name': ''}; 
+     });
+
+    var combine = function(name, item, isarray) {
+       return isarray ? (name + "[" + item + "]") :
+                        (name + "." + item);
+    };
 
 		while (stack.length > 0 && results > 0) {
+      if (log) console.log("Stack size: " + stack.length);
 			var item = stack.splice(0, 1)[0];
 			var base = item.base;
 			var key = item.key;
 			var name = item.name;
+			var array = item.array;
+      
+      if (log) console.log(JSON.stringify(item));
 
 			if (key === checked ||
 				base[key] == null || 
@@ -90,31 +102,38 @@ window.grep =
 						stack[stack.length] =
 							{'base': base[key], 
 								'key': i, 
-								'name': name + "[" + i + "]"};
+								'name': name + "." + key +"[" + i + "]"};
 
 						if (log) console.log(stack[stack.length-1]);
 					}
 
 					continue;
 				} else {
-					if (re(key) || re(base[key]) || re(begin + "." + key)) {
-						if (log) console.log("Found " + name + "." + key );
+					if (log) console.log("Testing " + key);
+					if (log) console.log("Testing " + base[key]);
+					if (log) console.log("Testing " + begin + "." + name);
 
-						var prefix = begin ? begin + "." : 'obj.';
-					    
+          if (re(key) || re(base[key]) || re(begin + "." + name)) {
+						if (log) console.log("Found " + name + "." + key + "("+array+")" );
+
+						var lvalue = 
+                 (begin ? begin : 'obj') +
+                 combine(name, key, array);
+
 						found[found.length] = 
-							(prefix + name + " = " + base[key]);
+							(lvalue + " = " + base[key]);
 						results--;
 					}
 
-					if (isObject(base)) {
+					if (isObject(base[key])) {
 						if (log) console.log("Processing Object " + name + "." + key );
 
 						each(base[key], function(item) {
 							stack[stack.length] =
 								{'base': base[key], 
 									'key': item, 
-									'name': name + "." + item};
+                  'array': isArray(base),                    
+									'name': combine(name, item, isArray(base))};
 						});
 					}
 				}
@@ -126,3 +145,76 @@ window.grep =
 		return found;
 	};
 
+window.assert = function(value, test) {
+        if (value) console.log(test +": Passed");
+        else console.log(test + ": Failed");
+}
+
+window.assertEqual = function(key, desired, test) {
+        var value = (key===desired);
+        
+        if (value) console.log(test +": Passed");
+        else console.log(test + ": Failed (" + desired + " <> " + key + ")");
+}
+
+function testTopLevelArray() {
+  var obj = ["a", "b", "C"];
+  var result = grep(obj, "C", 1)[0];
+  assertEqual(result, "obj[2] = C", "testTopLevelArray");
+}
+testTopLevelArray();
+
+function testSubArray() {
+  var obj = {d: ["a", "b", "C"]};
+  var result = grep(obj, "C", 1, "obj", true)[0];
+  assertEqual(result, "obj.d[2] = C", "testSubLevelArray");
+}
+testSubArray();
+
+function testInt() {
+  var obj = {d: 56};
+  var result = grep(obj, "56")[0];
+  assertEqual(result, "obj.d = 56", "testInt");
+}
+testInt();
+
+function testString() {
+  var obj = {d: 'test'};
+  var result = grep(obj, "test")[0];
+  assertEqual(result, "obj.d = test", "testString");
+}
+testString();
+
+function testRecursion() {
+  var obj = {d: ""};
+  obj.d = obj;
+  var result = grep(obj, "obj")[0];
+  assertEqual(result, "obj.d = [object Object]", "testRecursion");
+}
+testRecursion();
+
+function testObject() {
+  var obj = {d: {a: "b"}};
+  var result = grep(obj, "d")[0];
+
+  assertEqual(result, "obj.d = [object Object]", "testObject");
+}
+testObject();
+
+function testFunction() {
+  var obj = {d: {a: testFunction}};
+  var result = grep(obj, "result")[0];
+
+  assertEqual(result, "obj.d = [object Object]", "testFunction");
+}
+testFunction();
+
+
+function testWindow() {
+  var result = grep(window, top)[0];
+
+  assert(result, "testWindow");
+}
+testWindow();
+
+phantom.exit();
