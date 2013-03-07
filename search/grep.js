@@ -59,22 +59,26 @@ window.grep =
 
 		if (log) console.log("Base object " + (isArray(base) ? "is array" : "is not array"));
 
-		each(keys(base), function(item){ 
-			if (log) console.log("Processing key " + item );
-			var key = isArray(base) ? (name + "[" + index++ + "]") : item;
-
-			stack[stack.length] = {
-				'base': base,
-				'key': item, 
-        'array': isArray(base),
-				'name': ''}; 
-     });
-
-    var combine = function(name, item, isarray) {
+  var combine = function(name, item, isarray) {
        return isarray ? (name + "[" + item + "]") :
                         (name + "." + item);
     };
 
+
+		each(keys(base), function(item){ 
+			if (log) console.log("Processing key " + item );
+			var key = isArray(base) ? (name + "[" + index++ + "]") : item;
+
+      if (!begin) begin = '';
+    
+			stack[stack.length] = {
+				'base': base,
+				'key': item, 
+        'array': isArray(base),
+				'name': combine(begin, item, isArray(base))}; 
+     });
+
+   
 		while (stack.length > 0 && results > 0) {
       if (log) console.log("Stack size: " + stack.length);
 			var item = stack.splice(0, 1)[0];
@@ -102,7 +106,8 @@ window.grep =
 						stack[stack.length] =
 							{'base': base[key], 
 								'key': i, 
-								'name': name + "." + key +"[" + i + "]"};
+                'array': true,
+								'name': name + "[" + i + "]"};
 
 						if (log) console.log(stack[stack.length-1]);
 					}
@@ -117,8 +122,7 @@ window.grep =
 						if (log) console.log("Found " + name + "." + key + "("+array+")" );
 
 						var lvalue = 
-                 (begin ? begin : 'obj') +
-                 combine(name, key, array);
+                 (begin ? '' : 'obj') + name;
 
 						found[found.length] = 
 							(lvalue + " = " + base[key]);
@@ -128,7 +132,7 @@ window.grep =
 					if (isObject(base[key])) {
 						if (log) console.log("Processing Object " + name + "." + key );
 
-						each(base[key], function(item) {
+						each(keys(base[key]), function(item) {
 							stack[stack.length] =
 								{'base': base[key], 
 									'key': item, 
@@ -166,7 +170,7 @@ testTopLevelArray();
 
 function testSubArray() {
   var obj = {d: ["a", "b", "C"]};
-  var result = grep(obj, "C", 1, "obj", true)[0];
+  var result = grep(obj, "C", 1, "obj", false)[0];
   assertEqual(result, "obj.d[2] = C", "testSubLevelArray");
 }
 testSubArray();
@@ -201,11 +205,20 @@ function testObject() {
 }
 testObject();
 
-function testFunction() {
-  var obj = {d: {a: testFunction}};
-  var result = grep(obj, "result")[0];
+function testSubObject() {
+  var obj = {d: {a: "test"}};
+  var result = grep(obj, "a", 1, "obj", false)[0];
 
-  assertEqual(result, "obj.d = [object Object]", "testFunction");
+  assertEqual(result, "obj.d.a = test", "testSubObject");
+}
+testSubObject();
+
+
+function testFunction() {
+  var obj = {d: {a: function(){ return "test" } }};
+  var result = grep(obj, "test", 1, "obj", false)[0];
+
+  assertEqual(result, "obj.d.a = function () { return \"test\"; }", "testFunction");
 }
 testFunction();
 
