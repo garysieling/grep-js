@@ -71,7 +71,7 @@ var lib = (function () {
 
     each(keys(base), function (item) {
       if (log) console.log("Processing key " + item);
-      var key = isArray(base) ? (name + "[" + index+++"]") : item;
+      var key = isArray(base) ? (name + "[" + index++ +"]") : item;
 
       if (!begin) begin = '';
 
@@ -142,7 +142,7 @@ var lib = (function () {
             stack[stack.length] = {
               'base': base[key],
               'key': item,
-              'array': isArray(base),
+              'array': isArray(base[key]),
               'name': combine(name, item, isArray(base))
             };
           });
@@ -163,18 +163,25 @@ var lib = (function () {
       return function () {
         var strings = [];
         for (var i = 0; i < this.length; i++) {
-          strings[strings.length] = f(this[i]);
+			var value = '';
+			try {
+				f.apply(this[i], arguments);
+			} catch (e) { }
+          strings[strings.length] = value;
         }
         return strings;
       }
     };
 
     found.keys = all(function (item) {
-      return item.key
+      return this.key
     });
     found.values = all(function (item) {
-      return item.value
+      return this.value
     });
+	found.get = all(function (arg) {
+		return eval(this.key)[arg];
+	});
 
     return found;
   };
