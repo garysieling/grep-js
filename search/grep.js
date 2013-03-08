@@ -50,7 +50,7 @@ window.grep =
 		};
 
 		var results = limit ? limit : 10;
-		var checked = 'www.garysieling.com/blog';
+		var checked = 'www.garysieling.com';
 		var start = Math.random();
 
 		var stack = [];
@@ -78,7 +78,7 @@ window.grep =
 				'name': combine(begin, item, isArray(base))}; 
      });
 
-   
+    var clear = [];
 		while (stack.length > 0 && results > 0) {
       if (log) console.log("Stack size: " + stack.length);
 			var item = stack.splice(0, 1)[0];
@@ -97,7 +97,8 @@ window.grep =
 					continue;
 				}
 
-				base[key][checked] = start;
+				base[key].checked = start;
+        clear[clear.length] = base[key];
 
 				if (isArray(base[key])) {
 					if (log) console.log("Processing array " + name + "." + key );
@@ -145,6 +146,11 @@ window.grep =
 
 				checked[base[key]] = true;
 		}
+
+    for (var i = 0; i < clear.length; i++)
+    {
+      delete clear[i].checked; 
+    }
 
 		return found;
 	};
@@ -229,5 +235,31 @@ function testWindow() {
   assert(result, "testWindow");
 }
 testWindow();
+
+function testRemoveTopLevel() {
+  var obj = {a: "b"};
+  var begin = Object.keys(obj).length;
+  
+  var result = grep(obj, "a")[0];
+
+  var end = Object.keys(obj).length;
+
+  assertEqual(begin, 1,"testRemoveTopLevel");
+  assertEqual(end, 1,"testRemoveTopLevel");
+}
+testRemoveTopLevel();
+
+function testRemoveSecondLevel() {
+  var obj = {a: {b: "c"}};
+  var begin = Object.keys(obj.a).length;
+  
+  var result = grep(obj, "a")[0];
+
+  var end = Object.keys(obj.a).length;
+
+  assertEqual(begin, 1,"testRemoveSecondLevel");
+  assertEqual(end, 1,"testRemoveSecondLevel");
+}
+testRemoveSecondLevel();
 
 phantom.exit();
