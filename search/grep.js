@@ -1,4 +1,7 @@
-window.grep = function grep(base, search, limit, begin, log) {
+window.grep = 
+(function(){
+ "use strict";
+  var grep = function (base, search, limit, begin, log) {
   if (log) console.log("Search : " + search);
   var breaker = {};
   var ArrayProto = Array.prototype;
@@ -149,6 +152,8 @@ window.grep = function grep(base, search, limit, begin, log) {
 
   return found;
 };
+ return grep;
+})();
 
 window.assert = function (value, test) {
   if (value) console.log(test + ": Passed");
