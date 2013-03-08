@@ -1,7 +1,7 @@
 window.grep = 
 (function(){
  "use strict";
-  var grep = function (base, search, limit, begin, log) {
+  return function (base, search, limit, begin, log) {
   if (log) console.log("Search : " + search);
   var breaker = {};
   var ArrayProto = Array.prototype;
@@ -124,7 +124,7 @@ window.grep =
 
         var lvalue = (begin ? '' : 'obj') + name;
 
-        found[found.length] = (lvalue + " = " + base[key]);
+        found[found.length] = {key: lvalue, value: base[key] + ''};
         results--;
       }
 
@@ -150,9 +150,21 @@ window.grep =
     delete clear[i].checked;
   }
 
+  var all = function(f) {
+    return function() {
+      var strings = [];
+      for (var i = 0; i < this.length; i++) {
+        strings[strings.length] = f(this[i]);
+      }
+      return strings;
+    }
+  };
+
+  found.keys = all(function(item) { return item.key });
+  found.values = all(function(item) { return item.value });
+
   return found;
 };
- return grep;
 })();
 
 window.assert = function (value, test) {
@@ -170,7 +182,7 @@ window.assertEqual = function (key, desired, test) {
 function testTopLevelArray() {
   var obj = ["a", "b", "C"];
   var result = grep(obj, "C", 1)[0];
-  assertEqual(result, "obj[2] = C", "testTopLevelArray");
+  assertEqual(result.key + " = " + result.value, "obj[2] = C", "testTopLevelArray");
 }
 testTopLevelArray();
 
@@ -179,7 +191,7 @@ function testSubArray() {
     d: ["a", "b", "C"]
   };
   var result = grep(obj, "C", 1, "obj", false)[0];
-  assertEqual(result, "obj.d[2] = C", "testSubLevelArray");
+  assertEqual(result.key + " = " + result.value, "obj.d[2] = C", "testSubLevelArray");
 }
 testSubArray();
 
@@ -188,7 +200,7 @@ function testInt() {
     d: 56
   };
   var result = grep(obj, "56")[0];
-  assertEqual(result, "obj.d = 56", "testInt");
+  assertEqual(result.key + " = " + result.value, "obj.d = 56", "testInt");
 }
 testInt();
 
@@ -197,7 +209,7 @@ function testString() {
     d: 'test'
   };
   var result = grep(obj, "test")[0];
-  assertEqual(result, "obj.d = test", "testString");
+  assertEqual(result.key + " = " + result.value, "obj.d = test", "testString");
 }
 testString();
 
@@ -207,7 +219,7 @@ function testRecursion() {
   };
   obj.d = obj;
   var result = grep(obj, "obj")[0];
-  assertEqual(result, "obj.d = [object Object]", "testRecursion");
+  assertEqual(result.key + " = " + result.value, "obj.d = [object Object]", "testRecursion");
 }
 testRecursion();
 
@@ -219,7 +231,7 @@ function testObject() {
   };
   var result = grep(obj, "d")[0];
 
-  assertEqual(result, "obj.d = [object Object]", "testObject");
+  assertEqual(result.key + " = " + result.value, "obj.d = [object Object]", "testObject");
 }
 testObject();
 
@@ -231,7 +243,7 @@ function testSubObject() {
   };
   var result = grep(obj, "a", 1, "obj", false)[0];
 
-  assertEqual(result, "obj.d.a = test", "testSubObject");
+  assertEqual(result.key + " = " + result.value, "obj.d.a = test", "testSubObject");
 }
 testSubObject();
 
@@ -244,7 +256,7 @@ function testFunction() {
   };
   var result = grep(obj, "test", 1, "obj", false)[0];
 
-  assertEqual(result, "obj.d.a = function () { return \"test\"; }", "testFunction");
+  assertEqual(result.key + " = " + result.value, "obj.d.a = function () { return \"test\"; }", "testFunction");
 }
 testFunction();
 
@@ -287,6 +299,30 @@ function testRemoveSecondLevel() {
   assertEqual(end, 1, "testRemoveSecondLevel");
 }
 testRemoveSecondLevel();
+
+function testKeys() {
+  var obj = {
+    a: {
+      b: "c"
+    }
+  };
+  var result = grep(obj, "c").keys()[0];
+
+  assertEqual(result, "b", "testKeys");
+}
+testKeys();
+
+function testValues() {
+  var obj = {
+    a: {
+      b: "c"
+    }
+  };
+  var result = grep(obj, "c").values()[0];
+
+  assertEqual(result, "c", "testValues");
+}
+testValues();
 
 phantom.exit();
 
