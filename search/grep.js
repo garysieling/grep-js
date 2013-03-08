@@ -57,6 +57,11 @@ var lib = (function () {
 
     var index = 0;
 
+	if (typeof base === "string") {
+		begin = base;
+		base = eval(base);
+	}
+
     if (log) console.log("Base object " + (isArray(base) ? "is array" : "is not array"));
 
     var combine = function (name, item, isarray) {
@@ -333,9 +338,14 @@ var lib = (function () {
     testValues();
   }
 
+  function install() {
+	window.grep = grep;
+  }
+
   return {
     grep: grep,
-    test: test
+    test: test,
+	install: install
   };
 })();
 
