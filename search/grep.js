@@ -1,4 +1,4 @@
-var lib = (function () {
+(function () {
   "use strict";
   var grep = function (base, search, limit, begin, log) {
     if (log) console.log("Search : " + search);
@@ -355,7 +355,4 @@ var lib = (function () {
 	install: install
   };
 })();
-
-lib.test();
-phantom.exit();
 
