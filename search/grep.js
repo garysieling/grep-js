@@ -165,7 +165,7 @@ var lib = (function () {
         for (var i = 0; i < this.length; i++) {
 			var value = '';
 			try {
-				f.apply(this[i], arguments);
+				strings[i] = f.apply(this[i], arguments);
 			} catch (e) { }
           strings[strings.length] = value;
         }
