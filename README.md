@@ -14,21 +14,21 @@ var lib = ...contents of grep.js...
 lib.test();
 ```
 
-testTopLevelArray: Passed
-testSubLevelArray: Passed
-testInt: Passed
-testString: Passed
-testRecursion: Passed
-testObject: Passed
-testSubObject: Passed
-testFunction: Passed
-testWindow: Passed
-testRemoveTopLevel: Passed
-testRemoveTopLevel: Passed
-testRemoveSecondLevel: Passed
-testRemoveSecondLevel: Passed
-testKeys: Failed (b <> obj.a)
-testValues: Failed (c <> [object Object])
+testTopLevelArray: Passed  
+testSubLevelArray: Passed  
+testInt: Passed  
+testString: Passed  
+testRecursion: Passed  
+testObject: Passed  
+testSubObject: Passed  
+testFunction: Passed  
+testWindow: Passed  
+testRemoveTopLevel: Passed  
+testRemoveTopLevel: Passed  
+testRemoveSecondLevel: Passed  
+testRemoveSecondLevel: Passed  
+testKeys: Passed  
+testValues: Passed  
 
 Installation
 ------------
