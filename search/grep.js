@@ -100,7 +100,7 @@
         continue;
       }
 
-      base[key].checked = start;
+      base[key][checked] = start;
       clear[clear.length] = base[key];
 
       if (isArray(base[key])) {
