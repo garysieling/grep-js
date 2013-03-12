@@ -238,7 +238,7 @@
         d: ""
       };
       obj.d = obj;
-      var result = grep("obj", "obj")[0];
+      var result = grep(obj, "d")[0];
       assertEqual(result.key + " = " + result.value, "obj.d = [object Object]", "testRecursion");
     }
     testRecursion();
