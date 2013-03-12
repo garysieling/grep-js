@@ -25,17 +25,30 @@ testRemoveSecondLevel: Passed
 testKeys: Failed (b <> obj.a)
 testValues: Failed (c <> [object Object])
 
-*lib.install();*
-*grep("window", "location")*
-_[Object, Object, Object, Object, Object, Object, Object, Object, Object, Object]_
+```javascript
+lib.install();
+```
 
-*grep("document", "location").keys()*
-_["document.location", "document.location.assign", "document.location.replace", "document.location.reload", "document.location.ancestorOrigins", "document.location.origin", "document.location.hash", "document.location.search", "document.location.pathname", "document.location.port", ""]_
+```javascript
+grep("window", "location")
+```
+[Object, Object, Object, Object, Object, Object, Object, Object, Object, Object]
 
-*grep("document", "location$").keys();*
-_["document.location", "document.defaultView.location", "document.activeElement.ownerDocument.location", "document.head.ownerDocument.location", "document.body.ownerDocument.location", "document.defaultView.top.location", "document.defaultView.window.location", "document.defaultView.document.location", "document.defaultView.Modernizr.geolocation", "document.documentElement.classList.7", ""]_
 
-*grep("document", "location$").values()*
-_["https://github.com/garysieling/grep-js/blob/master/search/grep.js", "https://github.com/garysieling/grep-js/blob/master/search/grep.js", "https://github.com/garysieling/grep-js/blob/master/search/grep.js", "https://github.com/garysieling/grep-js/blob/master/search/grep.js", "https://github.com/garysieling/grep-js/blob/master/search/grep.js", "https://github.com/garysieling/grep-js/blob/master/search/grep.js", "https://github.com/garysieling/grep-js/blob/master/search/grep.js", "https://github.com/garysieling/grep-js/blob/master/search/grep.js", "true", "geolocation", ""]_
+```javascript
+grep("document", "location").keys()
+```
+["document.location", "document.location.assign", "document.location.replace", "document.location.reload", "document.location.ancestorOrigins", "document.location.origin", "document.location.hash", "document.location.search", "document.location.pathname", "document.location.port", ""]
+
+```javascript
+grep("document", "location$").keys();
+```
+["document.location", "document.defaultView.location", "document.activeElement.ownerDocument.location", "document.head.ownerDocument.location", "document.body.ownerDocument.location", "document.defaultView.top.location", "document.defaultView.window.location", "document.defaultView.document.location", "document.defaultView.Modernizr.geolocation", "document.documentElement.classList.7", ""]
+
+
+```javascript
+grep("document", "location$").values()
+```
+["https://github.com/garysieling/grep-js/blob/master/search/grep.js", "https://github.com/garysieling/grep-js/blob/master/search/grep.js", "https://github.com/garysieling/grep-js/blob/master/search/grep.js", "https://github.com/garysieling/grep-js/blob/master/search/grep.js", "https://github.com/garysieling/grep-js/blob/master/search/grep.js", "https://github.com/garysieling/grep-js/blob/master/search/grep.js", "https://github.com/garysieling/grep-js/blob/master/search/grep.js", "https://github.com/garysieling/grep-js/blob/master/search/grep.js", "true", "geolocation", ""]
 
 http://www.garysieling.com/blog
