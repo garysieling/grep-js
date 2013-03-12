@@ -46,6 +46,7 @@
 
     var found = [];
     var re = function f(x) {
+      if ((x + '') === '[object Object]') return false;
       return x !== null && (x + '').match && (x + '').match(RegExp(search)) != null;
     };
 
@@ -57,17 +58,16 @@
 
     var index = 0;
 
-	if (typeof base === "string") {
-		begin = base;
-		base = eval(base);
-	}
+    if (typeof base === "string") {
+      begin = base;
+      base = eval(base);
+    }
 
     if (log) console.log("Base object " + (isArray(base) ? "is array" : "is not array"));
 
     var combine = function (name, item, isarray) {
       return isarray ? (name + "[" + item + "]") : (name + "." + item);
     };
-
 
     each(keys(base), function (item) {
       if (log) console.log("Processing key " + item);
@@ -155,7 +155,7 @@
 
     for (var i = 0; i < clear.length; i++) {
       try {
-        delete clear[i].checked;
+        delete clear[i][checked];
       } catch (e) {}
     }
 
@@ -238,7 +238,7 @@
         d: ""
       };
       obj.d = obj;
-      var result = grep(obj, "obj")[0];
+      var result = grep("obj", "obj")[0];
       assertEqual(result.key + " = " + result.value, "obj.d = [object Object]", "testRecursion");
     }
     testRecursion();
@@ -328,7 +328,7 @@
       };
       var result = grep(obj, "c").keys()[0];
 
-      assertEqual(result, "b", "testKeys");
+      assertEqual(result, "obj.a.b", "testKeys");
     }
     testKeys();
 
